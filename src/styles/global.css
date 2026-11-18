@@ -1,0 +1,226 @@
+/* =====================================================
+   Tailwind CSS v4 — 暗色科技风主题
+   v4 用 @import 代替 @tailwind 指令，配置写在 CSS 里
+   ===================================================== */
+@import "tailwindcss";
+
+/* 自定义主题变量 —— 暗色科技风 */
+@theme {
+  /* 背景色 */
+  --color-bg-primary: #0a0a0f;
+  --color-bg-secondary: #111118;
+  --color-bg-card: rgba(17, 17, 24, 0.6);
+  --color-bg-glass: rgba(255, 255, 255, 0.03);
+
+  /* 文字色 */
+  --color-text-primary: #e4e4e7;
+  --color-text-secondary: #a1a1aa;
+  --color-text-muted: #71717a;
+
+  /* 强调色 */
+  --color-accent-cyan: #22d3ee;
+  --color-accent-purple: #a855f7;
+  --color-accent-pink: #ec4899;
+
+  /* 边框 */
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-glow: rgba(34, 211, 238, 0.3);
+
+  /* 字体 */
+  --font-mono: 'JetBrains Mono', 'Fira Code', ui-monospace, monospace;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* =====================================================
+   全局基础样式
+   ===================================================== */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-family: var(--font-sans);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* 背景网格效果 */
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* 选中文本样式 */
+  ::selection {
+    background: var(--color-accent-cyan);
+    color: var(--color-bg-primary);
+  }
+
+  /* 滚动条样式 */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-bg-secondary);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-accent-cyan);
+  }
+
+  /* 链接默认样式 */
+  a {
+    color: var(--color-accent-cyan);
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  a:hover {
+    color: var(--color-accent-purple);
+  }
+
+  /* 代码块样式 */
+  code {
+    font-family: var(--font-mono);
+    background: var(--color-bg-secondary);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.875em;
+  }
+
+  pre {
+    font-family: var(--font-mono);
+    background: var(--color-bg-secondary);
+    padding: 1.25rem;
+    border-radius: 8px;
+    overflow-x: auto;
+    border: 1px solid var(--color-border);
+  }
+  pre code {
+    background: none;
+    padding: 0;
+  }
+}
+
+/* =====================================================
+   工具类 —— 可复用的组件样式
+   ===================================================== */
+@layer utilities {
+  /* 玻璃卡片 */
+  .glass-card {
+    background: var(--color-bg-glass);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  .glass-card:hover {
+    border-color: var(--color-border-glow);
+    box-shadow: 0 0 24px rgba(34, 211, 238, 0.1);
+  }
+
+  /* 霓虹边框按钮 */
+  .btn-neon {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-accent-cyan);
+    background: transparent;
+    border: 1px solid var(--color-accent-cyan);
+    border-radius: 6px;
+    transition: all 0.25s ease;
+  }
+  .btn-neon:hover {
+    background: rgba(34, 211, 238, 0.1);
+    box-shadow: 0 0 12px rgba(34, 211, 238, 0.3);
+    color: var(--color-text-primary);
+  }
+
+  /* 分区标题装饰 */
+  .section-title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--color-accent-cyan);
+    margin-bottom: 2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  .section-title::before {
+    content: '//';
+    opacity: 0.6;
+  }
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--color-border-glow), transparent);
+  }
+
+  /* 渐变文字 */
+  .gradient-text {
+    background: linear-gradient(135deg, var(--color-accent-cyan), var(--color-accent-purple));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* 淡入动画 */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .animate-fade-in-up {
+    animation: fadeInUp 0.6s ease forwards;
+  }
+
+  /* 标签 */
+  .tag {
+    display: inline-block;
+    padding: 2px 10px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    color: var(--color-text-secondary);
+  }
+
+  /* 标签颜色变体 */
+  .tag-js { background: rgba(247, 223, 30, 0.1); color: #f7df1e; border-color: rgba(247, 223, 30, 0.3); }
+  .tag-ts { background: rgba(31, 121, 217, 0.1); color: #3178d9; border-color: rgba(31, 121, 217, 0.3); }
+  .tag-py { background: rgba(54, 112, 165, 0.1); color: #3670a5; border-color: rgba(54, 112, 165, 0.3); }
+  .tag-vue { background: rgba(66, 184, 131, 0.1); color: #42b883; border-color: rgba(66, 184, 131, 0.3); }
+  .tag-react { background: rgba(97, 219, 251, 0.1); color: #61dbfb; border-color: rgba(97, 219, 251, 0.3); }
+  .tag-html { background: rgba(227, 76, 38, 0.1); color: #e34c26; border-color: rgba(227, 76, 38, 0.3); }
+  .tag-css { background: rgba(29, 101, 241, 0.1); color: #1d65f1; border-color: rgba(29, 101, 241, 0.3); }
+  .tag-java { background: rgba(248, 143, 35, 0.1); color: #f88f23; border-color: rgba(248, 143, 35, 0.3); }
+  .tag-default { background: var(--color-bg-secondary); }
+}

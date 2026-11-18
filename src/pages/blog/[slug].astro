@@ -1,0 +1,238 @@
+---
+/**
+ * 博客文章详情页 —— 动态路由
+ * SSG：构建时为每篇文章生成静态 HTML
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+import readingTime from 'reading-time';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => !data.draft);
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const minutes = Math.max(1, Math.round(readingTime(post.body).minutes));
+const formattedDate = post.data.pubDate.toLocaleDateString('zh-CN', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+
+// 上一篇 / 下一篇
+const allPosts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+const currentIndex = allPosts.findIndex((p) => p.slug === post.slug);
+const prevPost = currentIndex > 0 ? allPosts[currentIndex - 1] : null;
+const nextPost = currentIndex < allPosts.length - 1 ? allPosts[currentIndex + 1] : null;
+---
+
+<BaseLayout title={`${post.data.title} — L-royse.dev`} description={post.data.description}>
+  <!-- 文章头部 -->
+  <article>
+    <header class="mb-10 pb-8 border-b border-border">
+      <div class="flex items-center gap-3 font-mono text-xs text-text-muted mb-4">
+        <a href="/blog" class="no-underline hover:text-accent-cyan">← back to blog</a>
+        <span>·</span>
+        <time datetime={post.data.pubDate.toISOString()}>{formattedDate}</time>
+        <span>·</span>
+        <span>{minutes} min read</span>
+      </div>
+
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 leading-tight gradient-text">
+        {post.data.title}
+      </h1>
+
+      <p class="text-text-secondary text-lg leading-relaxed">
+        {post.data.description}
+      </p>
+
+      {post.data.tags.length > 0 && (
+        <div class="flex flex-wrap gap-2 mt-4">
+          {post.data.tags.map((tag) => (
+            <a href={`/blog?tag=${tag}`} class="tag no-underline">#{tag}</a>
+          ))}
+        </div>
+      )}
+    </header>
+
+    <!-- 文章正文 -->
+    <div class="prose-blog">
+      <slot />
+    </div>
+
+    <!-- 上一篇 / 下一篇 -->
+    <nav class="mt-16 pt-8 border-t border-border grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {prevPost ? (
+        <a href={`/blog/${prevPost.slug}/`} class="glass-card p-4 no-underline block group">
+          <div class="font-mono text-xs text-text-muted mb-1">← previous</div>
+          <div class="text-text-primary group-hover:text-accent-cyan transition-colors font-medium">
+            {prevPost.data.title}
+          </div>
+        </a>
+      ) : <div></div>}
+
+      {nextPost ? (
+        <a href={`/blog/${nextPost.slug}/`} class="glass-card p-4 no-underline block group sm:text-right">
+          <div class="font-mono text-xs text-text-muted mb-1">next →</div>
+          <div class="text-text-primary group-hover:text-accent-cyan transition-colors font-medium">
+            {nextPost.data.title}
+          </div>
+        </a>
+      ) : <div></div>}
+    </nav>
+  </article>
+</BaseLayout>
+
+<style is:global>
+/* 博客正文排版样式 —— 暗色科技风 */
+.prose-blog {
+  color: var(--color-text-primary);
+  font-size: 1rem;
+  line-height: 1.85;
+}
+
+.prose-blog h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--color-border);
+  font-family: var(--font-sans);
+}
+
+.prose-blog h3 {
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin-top: 2.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.prose-blog h4 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin-top: 1.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose-blog p {
+  margin: 1rem 0;
+  color: var(--color-text-primary);
+}
+
+.prose-blog a {
+  color: var(--color-accent-cyan);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+.prose-blog a:hover {
+  border-bottom-color: var(--color-accent-cyan);
+}
+
+.prose-blog ul,
+.prose-blog ol {
+  margin: 1rem 0;
+  padding-left: 1.5rem;
+}
+
+.prose-blog ul li {
+  list-style: none;
+  position: relative;
+  padding-left: 1rem;
+  margin: 0.35rem 0;
+}
+.prose-blog ul li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--color-accent-cyan);
+  font-size: 0.85em;
+}
+
+.prose-blog ol {
+  list-style: decimal;
+}
+.prose-blog ol li {
+  margin: 0.35rem 0;
+}
+
+.prose-blog blockquote {
+  border-left: 3px solid var(--color-accent-cyan);
+  padding: 0.5rem 1rem;
+  margin: 1.25rem 0;
+  background: var(--color-bg-secondary);
+  border-radius: 0 8px 8px 0;
+  color: var(--color-text-secondary);
+  font-style: italic;
+}
+
+.prose-blog pre {
+  margin: 1.5rem 0;
+  position: relative;
+}
+
+.prose-blog pre code {
+  display: block;
+  padding: 0.25rem 0;
+  font-size: 0.875rem;
+  line-height: 1.7;
+  overflow-x: auto;
+}
+
+.prose-blog code {
+  font-family: var(--font-mono);
+  background: var(--color-bg-secondary);
+  padding: 0.15rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.875em;
+  color: var(--color-accent-cyan);
+}
+
+.prose-blog pre code {
+  background: transparent;
+  padding: 0;
+  color: var(--color-text-primary);
+}
+
+.prose-blog img {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 1.5rem 0;
+  border: 1px solid var(--color-border);
+}
+
+.prose-blog hr {
+  border: none;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-border), transparent);
+  margin: 2.5rem 0;
+}
+
+.prose-blog table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  font-size: 0.9rem;
+}
+
+.prose-blog th,
+.prose-blog td {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--color-border);
+  text-align: left;
+}
+
+.prose-blog th {
+  background: var(--color-bg-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-accent-cyan);
+}
+</style>

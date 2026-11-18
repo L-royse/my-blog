@@ -1,0 +1,74 @@
+---
+/**
+ * 博客列表页
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import BlogPostCard from '@/components/BlogPostCard.astro';
+import { getCollection } from 'astro:content';
+
+const allPosts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+// 按标签分组，用于筛选
+const allTags = [...new Set(allPosts.flatMap((p) => p.data.tags))].sort();
+
+// 从 query 获取当前标签筛选
+const currentTag = Astro.url.searchParams.get('tag');
+const filteredPosts = currentTag
+  ? allPosts.filter((p) => p.data.tags.includes(currentTag))
+  : allPosts;
+---
+
+<BaseLayout title={currentTag ? `#${currentTag} — 博客` : 'Blog — 全部文章'}>
+  <!-- 标题 -->
+  <div class="mb-10">
+    <h1 class="text-3xl sm:text-4xl font-bold mb-3 gradient-text">/blog</h1>
+    <p class="text-text-secondary font-mono text-sm">
+      writing about code, ideas, and things I build.
+    </p>
+  </div>
+
+  <!-- 标签筛选 -->
+  {allTags.length > 0 && (
+    <div class="mb-8 flex flex-wrap gap-2">
+      <a
+        href="/blog"
+        class="tag no-underline transition-colors"
+        style={!currentTag
+          ? 'border-color: var(--color-accent-cyan); color: var(--color-accent-cyan); background: rgba(34,211,238,0.1);'
+          : ''
+        }
+      >
+        all
+      </a>
+      {allTags.map((tag) => (
+        <a
+          href={`/blog?tag=${tag}`}
+          class="tag no-underline transition-colors"
+          style={currentTag === tag
+            ? 'border-color: var(--color-accent-cyan); color: var(--color-accent-cyan); background: rgba(34,211,238,0.1);'
+            : ''
+          }
+        >
+          #{tag}
+        </a>
+      ))}
+    </div>
+  )}
+
+  <!-- 文章列表 -->
+  {filteredPosts.length === 0 ? (
+    <div class="glass-card p-10 text-center">
+      <p class="font-mono text-sm text-text-secondary mb-2">// 这里还空空如也</p>
+      <p class="font-mono text-xs text-text-muted">
+        在 <code>src/content/blog/</code> 下创建 Markdown 文件开始你的第一篇文章吧 ✨
+      </p>
+    </div>
+  ) : (
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {filteredPosts.map((post) => (
+        <BlogPostCard post={post} />
+      ))}
+    </div>
+  )}
+</BaseLayout>

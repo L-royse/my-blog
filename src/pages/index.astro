@@ -1,0 +1,95 @@
+---
+/**
+ * 首页
+ * Hero + 精选项目 + 技能图谱 + 数据面板 + 最新博客
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Hero from '@/components/Hero.astro';
+import ProjectCard from '@/components/ProjectCard.astro';
+import SkillCloud from '@/components/SkillCloud.astro';
+import GitHubPanel from '@/components/GitHubPanel.astro';
+import BlogPostCard from '@/components/BlogPostCard.astro';
+import { fetchUser, fetchRepos } from '@/data/github';
+import { getCollection } from 'astro:content';
+
+// 构建时获取数据
+const [user, repos] = await Promise.all([fetchUser(), fetchRepos()]);
+
+// 精选项目：取前 6 个
+const featuredRepos = repos.slice(0, 6);
+
+// 最新文章（排除 draft）
+const posts = (await getCollection('blog', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+  .slice(0, 3);
+---
+
+<BaseLayout title="L-royse.dev — 个人博客 & 项目展示">
+  <!-- Hero -->
+  <Hero user={user} />
+
+  <!-- GitHub 数据面板 -->
+  <section class="mb-20">
+    <GitHubPanel repos={repos} user={user} />
+  </section>
+
+  <!-- 精选项目 -->
+  <section class="mb-20">
+    <h2 class="section-title">featured projects</h2>
+
+    {featuredRepos.length === 0 ? (
+      <div class="glass-card p-8 text-center">
+        <p class="font-mono text-sm text-text-muted">
+          // no repos fetched — check GitHub API or add later
+        </p>
+      </div>
+    ) : (
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {featuredRepos.map((repo, i) => (
+          <div style={`animation-delay: ${i * 80}ms;`}>
+            <ProjectCard repo={repo} />
+          </div>
+        ))}
+      </div>
+    )}
+
+    <div class="mt-6 text-center">
+      <a href="/projects" class="btn-neon" style="border-color: var(--color-accent-purple); color: var(--color-accent-purple);">
+        All Projects →
+      </a>
+    </div>
+  </section>
+
+  <!-- 技能图谱 -->
+  <section class="mb-20">
+    <SkillCloud />
+  </section>
+
+  <!-- 最新博客 -->
+  <section class="mb-10">
+    <h2 class="section-title">latest posts</h2>
+
+    {posts.length === 0 ? (
+      <div class="glass-card p-8 text-center">
+        <p class="font-mono text-sm text-text-secondary mb-2">// 还没有文章哦</p>
+        <p class="font-mono text-xs text-text-muted">
+          在 <code>src/content/blog/</code> 下创建 <code>.md</code> 文件开始写作 📝
+        </p>
+      </div>
+    ) : (
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {posts.map((post) => (
+          <BlogPostCard post={post} />
+        ))}
+      </div>
+    )}
+
+    {posts.length > 0 && (
+      <div class="mt-6 text-center">
+        <a href="/blog" class="btn-neon" style="border-color: var(--color-accent-purple); color: var(--color-accent-purple);">
+          All Posts →
+        </a>
+      </div>
+    )}
+  </section>
+</BaseLayout>

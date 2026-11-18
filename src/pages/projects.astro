@@ -1,0 +1,136 @@
+---
+/**
+ * 项目列表页 —— 展示全部 GitHub Repos
+ * 支持按语言筛选
+ */
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ProjectCard from '@/components/ProjectCard.astro';
+import { fetchRepos, aggregateLanguages } from '@/data/github';
+
+const allRepos = await fetchRepos();
+
+// 从 query 获取语言筛选
+const currentLang = Astro.url.searchParams.get('lang');
+
+// 所有出现过的语言
+const langStats = aggregateLanguages(allRepos);
+const allLanguages = Object.keys(langStats).sort();
+
+const filteredRepos = currentLang
+  ? allRepos.filter((r) => r.language === currentLang)
+  : allRepos;
+
+// 自建并部署在自有服务器上的站点（非 GitHub 仓库）
+const sites = [
+  {
+    name: '回声 · Echo Room',
+    host: 'voice.liu-royse.site',
+    url: 'https://voice.liu-royse.site',
+    desc: '网页版文字与语音空间，邀请码注册，mediasoup SFU 转发音频',
+    stack: ['Node.js', 'WebRTC', 'Docker'],
+  },
+  {
+    name: 'OpenCart 商城',
+    host: 'shop.liu-royse.site',
+    url: 'https://shop.liu-royse.site',
+    desc: '自托管电商系统，商品、订单、客户与优惠券模块齐全',
+    stack: ['PHP', 'MariaDB', 'Nginx'],
+  },
+];
+---
+
+<BaseLayout title="Projects — GitHub 项目">
+  <!-- 标题 -->
+  <div class="mb-10">
+    <h1 class="text-3xl sm:text-4xl font-bold mb-3 gradient-text">/projects</h1>
+    <p class="text-text-secondary font-mono text-sm">
+      {allRepos.length} repositories · fetched from GitHub API at build time
+    </p>
+  </div>
+
+  <!-- 在线站点 -->
+  <section class="mb-14">
+    <h2 class="section-title">live sites</h2>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {sites.map((site) => (
+        <a
+          href={site.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="glass-card block p-5 no-underline group animate-fade-in-up"
+        >
+          <div class="flex items-start justify-between gap-2 mb-2">
+            <h3 class="font-mono text-base font-semibold text-text-primary m-0 group-hover:text-accent-cyan transition-colors">
+              {site.name}
+            </h3>
+            <span class="tag" style="font-size: 0.625rem; border-color: rgba(34,211,238,0.4); color: var(--color-accent-cyan);">
+              online
+            </span>
+          </div>
+          <p class="text-sm text-text-secondary m-0 mb-3 leading-relaxed">{site.desc}</p>
+          <p class="font-mono text-xs text-text-muted m-0 mb-3">{site.host}</p>
+          <div class="flex flex-wrap gap-2">
+            {site.stack.map((s) => <span class="tag">{s}</span>)}
+          </div>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <h2 class="section-title">github repos</h2>
+
+  <!-- 语言筛选 -->
+  {allLanguages.length > 0 && (
+    <div class="mb-8 flex flex-wrap gap-2">
+      <a
+        href="/projects"
+        class="tag no-underline transition-colors"
+        style={!currentLang
+          ? 'border-color: var(--color-accent-cyan); color: var(--color-accent-cyan); background: rgba(34,211,238,0.1);'
+          : ''
+        }
+      >
+        all ({allRepos.length})
+      </a>
+      {allLanguages.map((lang) => (
+        <a
+          href={`/projects?lang=${encodeURIComponent(lang)}`}
+          class="tag no-underline transition-colors"
+          style={currentLang === lang
+            ? 'border-color: var(--color-accent-cyan); color: var(--color-accent-cyan); background: rgba(34,211,238,0.1);'
+            : ''
+          }
+        >
+          {lang} ({langStats[lang]})
+        </a>
+      ))}
+    </div>
+  )}
+
+  <!-- 项目卡片网格 -->
+  {filteredRepos.length === 0 ? (
+    <div class="glass-card p-10 text-center">
+      <p class="font-mono text-sm text-text-muted">// no projects match this filter</p>
+    </div>
+  ) : (
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      {filteredRepos.map((repo, i) => (
+        <div style={`animation-delay: ${i * 60}ms;`}>
+          <ProjectCard repo={repo} />
+        </div>
+      ))}
+    </div>
+  )}
+
+  <!-- GitHub 链接 -->
+  <div class="mt-12 text-center">
+    <a
+      href="https://github.com/L-royse?tab=repositories"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="btn-neon"
+    >
+      View All on GitHub →
+    </a>
+  </div>
+</BaseLayout>

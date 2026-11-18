@@ -1,0 +1,66 @@
+---
+/**
+ * 技能图谱 —— 标签云
+ * 展示常见的技术栈
+ */
+const skills = [
+  { name: 'JavaScript', level: 90 },
+  { name: 'TypeScript', level: 85 },
+  { name: 'Vue', level: 80 },
+  { name: 'React', level: 75 },
+  { name: 'Node.js', level: 70 },
+  { name: 'Python', level: 65 },
+  { name: 'HTML/CSS', level: 90 },
+  { name: 'Tailwind', level: 85 },
+  { name: 'Astro', level: 75 },
+  { name: 'Git', level: 85 },
+  { name: 'Docker', level: 55 },
+  { name: 'SQL', level: 60 },
+  { name: 'Java', level: 65 },
+  { name: 'SCSS', level: 70 },
+  { name: 'Linux', level: 70 },
+];
+
+// 颜色数组用于渐变
+const colors = [
+  'var(--color-accent-cyan)',
+  'var(--color-accent-purple)',
+  'var(--color-accent-pink)',
+  '#61dbfb',
+  '#42b883',
+  '#f7df1e',
+];
+
+// 根据 level 得到字体大小
+function getSize(level: number): string {
+  if (level >= 85) return 'text-sm';
+  if (level >= 70) return 'text-xs';
+  return 'text-[11px]';
+}
+
+function getOpacity(level: number): string {
+  // 透明度随熟练程度变化
+  return `${0.4 + (level / 100) * 0.6}`;
+}
+---
+
+<div class="glass-card p-6">
+  <h2 class="section-title">skills & stack</h2>
+
+  <div class="flex flex-wrap gap-2">
+    {skills.map((skill, i) => (
+      <span
+        class={`tag ${getSize(skill.level)} font-medium cursor-default transition-transform hover:scale-105`}
+        style={`
+          border-color: ${colors[i % colors.length]}40;
+          color: ${colors[i % colors.length]};
+          background: ${colors[i % colors.length]}10;
+          opacity: ${getOpacity(skill.level)};
+        `}
+        title={`${skill.name} — ${skill.level}%`}
+      >
+        {skill.name}
+      </span>
+    ))}
+  </div>
+</div>

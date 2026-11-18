@@ -1,0 +1,65 @@
+---
+/**
+ * 顶部导航栏
+ * 固定在页面顶部，玻璃拟态效果
+ */
+const links = [
+  { href: '/', label: '// home' },
+  { href: '/blog', label: '// blog' },
+  { href: '/projects', label: '// projects' },
+  { href: '/about', label: '// about' },
+];
+
+const currentPath = Astro.url.pathname;
+---
+
+<header
+  class="fixed top-0 left-0 right-0 z-50"
+  style="background: rgba(10, 10, 15, 0.8); backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255, 255, 255, 0.06);"
+>
+  <nav class="mx-auto max-w-5xl px-6 h-16 flex items-center justify-between">
+    <!-- Logo -->
+    <a href="/" class="font-mono text-sm flex items-center gap-2 no-underline">
+      <span class="w-2 h-2 rounded-full" style="background: var(--color-accent-cyan); box-shadow: 0 0 8px var(--color-accent-cyan);"></span>
+      <span class="text-text-primary">L-royse</span>
+      <span class="text-accent-purple">.dev</span>
+    </a>
+
+    <!-- Links -->
+    <ul class="hidden sm:flex items-center gap-6 list-none m-0 p-0">
+      {links.map((link) => {
+        const isActive = currentPath === link.href || (link.href !== '/' && currentPath.startsWith(link.href));
+        return (
+          <li>
+            <a
+              href={link.href}
+              class="font-mono text-sm no-underline transition-colors"
+              style={isActive
+                ? 'color: var(--color-accent-cyan);'
+                : 'color: var(--color-text-secondary);'
+              }
+            >
+              {link.label}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+
+    <!-- GitHub 链接 -->
+    <a
+      href="https://github.com/L-royse"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="hidden sm:inline-flex items-center gap-2 font-mono text-xs text-text-muted hover:text-accent-cyan no-underline"
+    >
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58 0-.29-.01-1.04-.02-2.05-3.34.73-4.04-1.61-4.04-1.61-.54-1.39-1.33-1.76-1.33-1.76-1.09-.75.08-.73.08-.73 1.21.08 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5.99.11-.77.42-1.3.76-1.6-2.66-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23A11.5 11.5 0 0 1 12 5.75c1.03.01 2.07.14 3.03.4 2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.62-5.49 5.92.43.37.81 1.1.81 2.22 0 1.6-.01 2.89-.01 3.28 0 .32.22.69.83.58C20.57 21.8 24 17.31 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      <span>github</span>
+    </a>
+
+    <!-- Mobile menu button (simple link for now) -->
+    <a href="https://github.com/L-royse" target="_blank" rel="noopener noreferrer" class="sm:hidden">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color: var(--color-text-secondary)"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.44 9.8 8.21 11.39.6.11.82-.26.82-.58 0-.29-.01-1.04-.02-2.05-3.34.73-4.04-1.61-4.04-1.61-.54-1.39-1.33-1.76-1.33-1.76-1.09-.75.08-.73.08-.73 1.21.08 1.84 1.24 1.84 1.24 1.07 1.83 2.81 1.3 3.5.99.11-.77.42-1.3.76-1.6-2.66-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.13-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23A11.5 11.5 0 0 1 12 5.75c1.03.01 2.07.14 3.03.4 2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.25 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.62-5.49 5.92.43.37.81 1.1.81 2.22 0 1.6-.01 2.89-.01 3.28 0 .32.22.69.83.58C20.57 21.8 24 17.31 24 12c0-6.63-5.37-12-12-12z"/></svg>
+    </a>
+  </nav>
+</header>

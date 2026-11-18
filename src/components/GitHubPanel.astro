@@ -1,0 +1,89 @@
+---
+/**
+ * GitHub 数据面板
+ * 展示：语言分布柱状图 + 基本统计数字
+ */
+import { aggregateLanguages, LANGUAGE_COLORS } from '@/data/github';
+import type { GithubRepo, GithubUser } from '@/data/github';
+
+interface Props {
+  repos: GithubRepo[];
+  user: GithubUser | null;
+}
+
+const { repos, user } = Astro.props;
+
+const langStats = aggregateLanguages(repos);
+const totalRepos = repos.length;
+const totalStars = repos.reduce((sum, r) => sum + r.stargazers_count, 0);
+const totalForks = repos.reduce((sum, r) => sum + r.forks_count, 0);
+
+// 取前 6 种语言
+const topLanguages = Object.entries(langStats)
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 6);
+
+const maxCount = topLanguages.length > 0 ? topLanguages[0][1] : 1;
+---
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <!-- 统计卡片 -->
+  <div class="glass-card p-6">
+    <h2 class="section-title">github stats</h2>
+
+    <div class="grid grid-cols-3 gap-4 text-center">
+      <div>
+        <div class="text-2xl sm:text-3xl font-bold gradient-text">{totalRepos}</div>
+        <div class="font-mono text-xs text-text-muted mt-1">repos</div>
+      </div>
+      <div>
+        <div class="text-2xl sm:text-3xl font-bold gradient-text">{totalStars}</div>
+        <div class="font-mono text-xs text-text-muted mt-1">stars</div>
+      </div>
+      <div>
+        <div class="text-2xl sm:text-3xl font-bold gradient-text">{user?.followers ?? 0}</div>
+        <div class="font-mono text-xs text-text-muted mt-1">followers</div>
+      </div>
+    </div>
+
+    {user?.location && (
+      <div class="mt-6 pt-4 border-t border-border font-mono text-xs text-text-muted">
+        📍 {user.location}
+      </div>
+    )}
+  </div>
+
+  <!-- 语言分布 -->
+  <div class="glass-card p-6">
+    <h2 class="section-title">top languages</h2>
+
+    {topLanguages.length === 0 ? (
+      <p class="text-text-muted text-sm">// loading...</p>
+    ) : (
+      <div class="space-y-3">
+        {topLanguages.map(([lang, count]) => {
+          const percent = ((count / maxCount) * 100).toFixed(0);
+          const color = LANGUAGE_COLORS[lang] || 'var(--color-accent-cyan)';
+          return (
+            <div>
+              <div class="flex items-center justify-between font-mono text-xs mb-1">
+                <span style={`color: ${color}`}>{lang}</span>
+                <span class="text-text-muted">{count} repo{count > 1 ? 's' : ''}</span>
+              </div>
+              <div class="h-1.5 rounded-full" style="background: var(--color-bg-secondary);">
+                <div
+                  class="h-full rounded-full transition-all"
+                  style={`
+                    width: ${percent}%;
+                    background: linear-gradient(90deg, ${color}, ${color}80);
+                    box-shadow: 0 0 8px ${color}40;
+                  `}
+                ></div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    )}
+  </div>
+</div>
